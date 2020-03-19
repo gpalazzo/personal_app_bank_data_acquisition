@@ -1,0 +1,11 @@
+certifi==2019.11.28
+pyyaml
+pandas
+numpy
+selenium
+pathlib
+twilio
+boto3
+typing
+datetime
+psycopg2-binary
