@@ -15,8 +15,8 @@ if [ "$answer_best_practices" == "y" ]; then
 
             read -r -p "Commit message: " commit_message
 
-            printf ">>> Deleting pycache, pyc and .idea files from: %s\n" "$current_branch"
-            find . | grep -E "(__pycache__|\.pyc|\.idea$)" | xargs rm -rf
+            printf ">>> Deleting pycache, pyc, .idea and .DS_Store files from: %s\n" "$current_branch"
+            find . | grep -E "(__pycache__|\.pyc|\.idea|.DS_Store$)" | xargs rm -rf
 
             printf ">>> Adding files from: %s\n" "$current_branch"
             git add .
@@ -42,8 +42,8 @@ if [ "$answer_best_practices" == "y" ]; then
         printf ">>> Making sure I'm in the right branch: %s\n" "$branch_to_be_merged"
         git checkout "$branch_to_be_merged"
 
-        printf ">>> Deleting pycache, pyc and .idea files from: %s\n" "$branch_to_be_merged"
-        find . | grep -E "(__pycache__|\.pyc|\.idea$)" | xargs rm -rf
+        printf ">>> Deleting pycache, pyc, .idea and .DS_Store files from: %s\n" "$branch_to_be_merged"
+        find . | grep -E "(__pycache__|\.pyc|\.idea|.DS_Store$)" | xargs rm -rf
 
         printf ">>> Adding files from: %s\n" "$branch_to_be_merged"
         git add .
@@ -57,8 +57,8 @@ if [ "$answer_best_practices" == "y" ]; then
         printf ">>> Merging %s with %s\n" "$branch_to_be_merged" "$branch_to_receive_merge"
         git merge "$branch_to_be_merged"
 
-        printf ">>> Deleting pycache, pyc and .idea files from: %s\n" "$branch_to_receive_merge"
-        find . | grep -E "(__pycache__|\.pyc|\.idea$)" | xargs rm -rf
+        printf ">>> Deleting pycache, pyc, .idea and .DS_Store files from: %s\n" "$branch_to_receive_merge"
+        find . | grep -E "(__pycache__|\.pyc|\.idea|.DS_Store$)" | xargs rm -rf
 
         printf ">>> Pushing branch: %s\n" "$branch_to_receive_merge"
         git push origin "$branch_to_receive_merge"

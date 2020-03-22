@@ -1,4 +1,4 @@
-from bank_microservice.src.core.financial.banking.wrapper_bank_initial_page import BankWrapper
+from wrapper_bank_initial_page import BankWrapper
 from time import sleep
 
 # pd and re are only used in expenses crawler
