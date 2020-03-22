@@ -1,22 +1,29 @@
 from wrapper_bank_initial_page import BankWrapper
+from datetime import datetime
+import json
+
 
 chrome = BankWrapper().get_initial_page()
 
 try:
     print("Getting cc balance...")
-    cc_elem = chrome.find_element_by_xpath('//*[@id="box_conteudo"]/table[1]/tbody/tr[1]/td[2]')
-    cc_balance_str = cc_elem.text.replace(".", "").replace(",", ".")[:-1]
-    print(f"saldo conta: {cc_balance_str}")
-    assert False, "break proposital."
-    db_client = DBClient(db_name="financial")
-    print("Updating database...")
-    db_client.insert_new_record(tbl_name="account_balance",
-                                values={"date_balance": date.today(),
-                                        "value_balance": float(cc_balance_str),
-                                        "email_status": "email_sent"})
+    acc_elem = chrome.find_element_by_xpath('//*[@id="box_conteudo"]/table[1]/tbody/tr[1]/td[2]')
+    acc_balance_str = acc_elem.text.replace(".", "").replace(",", ".")[:-1]
+
+    chrome.quit()
+
+    acc_balance_float = float(acc_balance_str)
+
+    data_dict = {"time_check": str(datetime.now()),
+             "acc_balance": acc_balance_float,
+             "email_status": "not_sent"}
+
+    json_dump_str = json.dumps(obj=data_dict)
+    json_loaded = json.loads(s=json_dump_str)
+
+    with open("output_files/acc_balance.json", "w") as f:
+        json.dump(obj=json_loaded, fp=f)
 
 except Exception as e:
     print(f"Erro: {e.args}")
     chrome.quit()
-
-chrome.quit()
