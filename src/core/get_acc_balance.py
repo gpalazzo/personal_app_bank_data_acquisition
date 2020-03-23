@@ -79,7 +79,7 @@ def main():
             json.dump(file_content, f)
 
     else:
-        create_json()
+        create_json(file_path=file_path, data_dict=data_dict)
 
 
 if __name__ == "__main__":
