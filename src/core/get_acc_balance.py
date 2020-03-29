@@ -67,7 +67,7 @@ def main():
     dir_path = Path(__file__).resolve().parents[2]
     file_path = dir_path / Path(f"output_files/acc_balance_{date_today}.json")
 
-    data_dict = {"time_check": str(time_now),
+    data_dict = {"action_timestamp": str(time_now),
                  "acc_balance": acc_balance_float,
                  "email_status": "not_sent"}
 

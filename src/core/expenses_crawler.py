@@ -1,72 +1,141 @@
 from wrapper_bank_initial_page import BankWrapper
 from time import sleep
-
-# pd and re are only used in expenses crawler
+import json
 import pandas as pd
 import re
+import os
+import io
+from datetime import datetime
+from pathlib import Path
 
-# get bank initial page after inserting env_var_handler
-chrome = BankWrapper().get_initial_page()
 
-# expenses crawler
-try:
-    print("Getting fatura cartão...")
-    fatura_cartao = chrome.find_element_by_xpath('//*[@id="menu_rapido"]/div[1]/form/ul/li[9]/a')
-    sleep(0.1)
-    fatura_cartao.click()
-    sleep(5)
+def _parse_dataframe(df: pd.DataFrame):
 
-    print("Hitting first buscar button...")
-    js_function = "selecionar('consultarCartao')"
-    chrome.execute_script(script=js_function)
-    sleep(0.1)
-    sleep(5)
+    try:
 
-    print("Hitting second buscar button...")
-    js_function = "selecionar('consultarFatura')"
-    chrome.execute_script(script=js_function)
-    sleep(0.1)
-    sleep(2)
+        return df.to_json(orient="index")
 
-    df = pd.DataFrame(columns={'Data', 'Empresa', 'Local', 'Valor'})
+    except Exception as e:
 
-    print("Getting all expenses...")
-    todos_gastos = chrome.find_elements_by_class_name('movimentosItem')
+        print(f"Error args: {e.args}")
 
-    for i, gasto in enumerate(todos_gastos):
 
-        if i >= 5:
-            splitted = gasto.text.split()
-            data = splitted[0]
-            valor = splitted[-1]
-            split_2quotes = gasto.text.split("  ")
+def create_json(file_path: str, json_content):
 
-            for elem in split_2quotes:
+    try:
 
-                if data in elem:
-                    empresa = re.sub(data, "", elem)
-                    empresa = empresa.strip()
+        with io.open(os.path.join(file_path), 'w') as f:
+            f.write(json.dumps(json_content))
 
-                if valor in elem:
-                    local = re.sub(valor, "", elem)
-                    local = local.strip()
+    except Exception as e:
+        print(f"Error args: {e.args}")
 
-            data_dict = {
-                "Data": data,
-                "Empresa": empresa,
-                "Local": local,
-                "Valor": valor
-            }
 
-            df = df.append(data_dict, ignore_index=True)
+def _get_chrome_authenticated():
 
-            if i == 10:
+    return BankWrapper().get_initial_page()
+
+
+def get_expenses() -> pd.DataFrame:
+
+    chrome = _get_chrome_authenticated()
+
+    try:
+        print("Getting fatura cartão...")
+        fatura_cartao = chrome.find_element_by_xpath('//*[@id="menu_rapido"]/div[1]/form/ul/li[9]/a')
+        sleep(0.1)
+        fatura_cartao.click()
+        sleep(5)
+
+        print("Hitting first buscar button...")
+        js_function = "selecionar('consultarCartao')"
+        chrome.execute_script(script=js_function)
+        sleep(0.1)
+        sleep(5)
+
+        print("Hitting second buscar button...")
+        js_function = "selecionar('consultarFatura')"
+        chrome.execute_script(script=js_function)
+        sleep(0.1)
+        sleep(2)
+
+        df = pd.DataFrame(columns={"date", "company", "place", "value", "action_timestamp"})
+
+        print("Getting all expenses...")
+        all_expenses = chrome.find_elements_by_class_name('movimentosItem')
+
+        initial_tr_number = 9999
+
+        for i, expense in enumerate(all_expenses, 1):
+
+            # if True, it means it's reading the TOTAL which I don't want to save here
+            if i == len(all_expenses):
                 break
 
-    print(f"dataframe:\n{df}")
+            else:
 
-except Exception as e:
-    print(f"Erro: {e.args}")
+                if "GASTOS DE GUILHERME PALAZZO" in expense.text:
+                    initial_tr_number = i
+
+                else:
+
+                    if i > initial_tr_number:
+
+                        time_now = str(datetime.now())
+
+                        splitted = expense.text.split()
+                        date = splitted[0]
+                        value = splitted[-1]
+                        split_2quotes = expense.text.split("  ")
+
+                        for elem in split_2quotes:
+
+                            if date in elem:
+                                company = re.sub(date, "", elem)
+                                company = company.strip()
+
+                            if value in elem:
+                                place = re.sub(value, "", elem)
+                                place = place.strip()
+
+                        data_dict = {
+                            "date": date,
+                            "company": company,
+                            "place": place,
+                            "value": value,
+                            "action_timestamp": time_now
+                        }
+
+                        # even though I'm going to generate JSON again, working with data frames simplify the process
+                        df = df.append(data_dict, ignore_index=True)
+
+                    else:
+                        continue
+
+        return df
+
+    except Exception as e:
+        print(f"Erro: {e.args}")
+        chrome.quit()
+
     chrome.quit()
 
-chrome.quit()
+
+def main():
+
+    expenses = get_expenses()
+
+    json_content_str = _parse_dataframe(expenses)
+
+    json_content = json.loads(json_content_str)
+
+    date_today = datetime.strftime(datetime.now(), "%Y-%m-%d")
+
+    dir_path = Path(__file__).resolve().parents[2]
+    file_path = dir_path / Path(f"output_files/acc_expenses_{date_today}.json")
+
+    create_json(file_path=file_path, json_content=json_content)
+
+
+if __name__ == "__main__":
+    main()
