@@ -1,0 +1,11 @@
+2020-04-12 16:26:11 - INFO - get_acc_balance.py - main - beginning of function
+2020-04-12 16:26:11 - INFO - get_acc_balance.py - get_acc_balance - beginning of function
+2020-04-12 16:26:11 - INFO - get_acc_balance.py - _get_chrome_authenticated - beginning of function
+2020-04-12 16:26:57 - INFO - get_acc_balance.py - _get_chrome_authenticated - ending of function
+2020-04-12 16:26:57 - INFO - get_acc_balance.py - get_acc_balance - trying to reach acc balance element at xpath: //*[@id="box_conteudo"]/table[1]/tbody/tr[1]/td[2]
+2020-04-12 16:26:57 - INFO - get_acc_balance.py - get_acc_balance - account balance element was reached successfully
+2020-04-12 16:26:57 - INFO - get_acc_balance.py - get_acc_balance - ending of function
+2020-04-12 16:26:57 - INFO - get_acc_balance.py - append_data_to_json - beginning of function
+2020-04-12 16:26:57 - INFO - get_acc_balance.py - append_data_to_json - appending to existing json file
+2020-04-12 16:26:57 - INFO - get_acc_balance.py - append_data_to_json - ending of function
+2020-04-12 16:26:57 - INFO - get_acc_balance.py - main - ending of function

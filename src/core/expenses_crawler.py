@@ -7,6 +7,7 @@ import os
 import io
 from datetime import datetime
 from pathlib import Path
+from src.clients.aws_s3_bucket import S3Bucket
 
 
 def _parse_dataframe(df: pd.DataFrame):
@@ -135,6 +136,8 @@ def main():
     file_path = dir_path / Path(f"output_files/acc_expenses_{date_today}.json")
 
     create_json(file_path=file_path, json_content=json_content)
+
+    S3Bucket().upload_file(file_path=str(file_path))
 
 
 if __name__ == "__main__":
