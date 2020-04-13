@@ -5,13 +5,22 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.remote.webelement import WebElement
 import os
 from env_var_handler.env_var_loader import load_credentials, load_config
+from logs.logs_generator import LogsClient
+from pathlib import Path
+
+
+file_name = os.path.basename(__file__)
+project_dir = Path(__file__).resolve().parents[2]
 
 
 class BankWrapper:
     """Class that encapsulates the process of inserting env_var_handler into bank web page.
     """
 
-    def __init__(self, options: List = ["--headless",
+    def __init__(self,
+                 log_run_uuid,
+                 log_output_file,
+                 options: List = ["--headless",
                                         {"profile.managed_default_content_settings.images": 2}]):
         """Creates instance of BankWrapper class with needed objects to login into bank web page.
         Args:
@@ -24,60 +33,144 @@ class BankWrapper:
         self.agency = os.getenv("bank_agency")
         self.account = os.getenv("bank_account")
         self.password = os.getenv("bank_password")
-        self.chrome = ChromeClient(_options=options).client
+        self.log_run_uuid = log_run_uuid
+        self.log_output_file = log_output_file
+        self.chrome = ChromeClient(log_run_uuid=log_run_uuid,
+                                   log_output_file=log_output_file,
+                                   _options=options)\
+                                    .client
 
     def find_element(self, find_method: str, path_to_elem: str, more_than_1_elem: bool = False) -> WebElement:
 
+        log_client = LogsClient(output_file=self.log_output_file,
+                                project_dir=project_dir,
+                                file_name=file_name,
+                                log_run_uuid=self.log_run_uuid)
+
+        log_client.set_msg(log_type="info",
+                           log_msg="beginning of function")
+
         try:
+
+            log_client.set_msg(log_type="info",
+                               log_msg=f"trying to reach element by {find_method} method at path: {path_to_elem}")
+
             if more_than_1_elem:
+
                 if find_method == "class":
-                    return self.chrome.find_elements_by_class_name(name=path_to_elem)
+
+                    web_elem = self.chrome.find_elements_by_class_name(name=path_to_elem)
 
             else:
+
                 if find_method == "xpath":
-                    return self.chrome.find_element_by_xpath(xpath=path_to_elem)
+
+                    web_elem = self.chrome.find_element_by_xpath(xpath=path_to_elem)
+
                 elif find_method == "class":
-                    return self.chrome.find_element_by_class_name(name=path_to_elem)
+
+                    web_elem = self.chrome.find_element_by_class_name(name=path_to_elem)
+
+            log_client.set_msg(log_type="info",
+                               log_msg="element was reached successfully")
 
             sleep(0.1)
 
-        except NoSuchElementException as e:
-            print(f"Error while trying to find elem at path: {path_to_elem}")
-            print(f"Error args: {e.args}")
+            log_client.set_msg(log_type="info",
+                               log_msg="ending of function")
 
-    @staticmethod
-    def action_on_elem(web_elem: WebElement, action: str, content: str = ""):
+            return web_elem
+
+        except NoSuchElementException:
+
+            log_client.set_msg(log_type="error",
+                               log_msg=f"error while trying to find elem at path: {path_to_elem}")
+
+        except Exception as e:
+
+            log_client.set_msg(log_type="error",
+                               log_msg=f"the following error occurred with args: {e.args}")
+
+    def action_on_elem(self, web_elem: WebElement, action: str, content: str = ""):
+
+        log_client = LogsClient(output_file=self.log_output_file,
+                                project_dir=project_dir,
+                                file_name=file_name,
+                                log_run_uuid=self.log_run_uuid)
+
+        log_client.set_msg(log_type="info",
+                           log_msg="beginning of function")
 
         try:
 
             if action == "click":
+
                 web_elem.click()
+
             elif action == "send_keys":
+
                 web_elem.send_keys(content)
+
+            log_client.set_msg(log_type="info",
+                               log_msg="ending of function")
 
             sleep(2)
 
-        except NoSuchElementException as e:
-            print(f"It's not possible to perform the action {action} on element {web_elem}")
-            print(f"Error args: {e.args}")
+        except NoSuchElementException:
+
+            log_client.set_msg(log_type="error",
+                               log_msg=f"error while trying to perform action: {action} at web element: {web_elem}")
+
+        except Exception as e:
+
+            log_client.set_msg(log_type="error",
+                               log_msg=f"the following error occurred with args: {e.args}")
 
     def get_initial_page(self):
+
+        log_client = LogsClient(output_file=self.log_output_file,
+                                project_dir=project_dir,
+                                file_name=file_name,
+                                log_run_uuid=self.log_run_uuid)
+
+        log_client.set_msg(log_type="info",
+                           log_msg="beginning of function")
 
         try:
 
             # delete cookies and go to defined url
+            log_client.set_msg(log_type="info",
+                               log_msg="deleting browser cookies")
+
             self.chrome.delete_all_cookies()
+
             sleep(2)
+
+            log_client.set_msg(log_type="info",
+                               log_msg=f"going to url: {self.url}")
+
             self.chrome.get(self.url)
+
             sleep(4)
 
             # get agency text box
+            web_elem_xpath = '//*[@id="cooperativa"]'
+
+            log_client.set_msg(log_type="info",
+                               log_msg=f"trying to reach element at xpath: {web_elem_xpath}")
+
             agency = self.find_element(find_method="xpath",
-                                       path_to_elem='//*[@id="cooperativa"]')
+                                       path_to_elem=web_elem_xpath)
+
+            log_client.set_msg(log_type="info",
+                               log_msg="element was reached successfully")
 
             sleep(2)
+
             # fill in agency
-            print("Filling agency...")
+            log_client.set_msg(log_type="info",
+                               log_msg="filling bank agency")
+
             self.action_on_elem(web_elem=agency,
                                 action="send_keys",
                                 content=self.agency)
@@ -85,24 +178,43 @@ class BankWrapper:
             sleep(2)
 
             # get account text box
+            web_elem_xpath = '//*[@id="conta"]'
+
+            log_client.set_msg(log_type="info",
+                               log_msg=f"trying to reach element at xpath: {web_elem_xpath}")
+
             account = self.find_element(find_method="xpath",
-                                        path_to_elem='//*[@id="conta"]')
+                                        path_to_elem=web_elem_xpath)
 
             # fill in account
-            print("Filling account...")
+            log_client.set_msg(log_type="info",
+                               log_msg="filling bank account")
+
             self.action_on_elem(web_elem=account,
                                 action="send_keys",
                                 content=self.account)
             sleep(2)
 
             # loop over password length
+            log_client.set_msg(log_type="info",
+                               log_msg="filling bank password")
+
             for i, character in enumerate(self.password, 1):
 
+                web_elem_path = "tecla"
+
+                log_client.set_msg(log_type="info",
+                                   log_msg=f"trying to reach element at path: {web_elem_path}")
+
                 numbered_btns = self.find_element(find_method="class",
-                                                  path_to_elem="tecla",
+                                                  path_to_elem=web_elem_path,
                                                   more_than_1_elem=True)
 
-                print(f"Filling character {i} of the password...")
+                log_client.set_msg(log_type="info",
+                                   log_msg="element was reached successfully")
+
+                log_client.set_msg(log_type="info",
+                                   log_msg=f"filling character {i} of the password")
 
                 # when there's match between password character and web page character, then click on it
                 for number in numbered_btns:
@@ -111,15 +223,31 @@ class BankWrapper:
                                             action="click")
 
             # login after filling in the password
+            web_elem_xpath = '//*[@id="buttons"]/input[1]'
+
+            log_client.set_msg(log_type="info",
+                               log_msg=f"trying to reach element at path: {web_elem_xpath}")
+
             login_btn = self.find_element(find_method="xpath",
-                                          path_to_elem='//*[@id="buttons"]/input[1]')
-            print("Logging in...")
+                                          path_to_elem=web_elem_xpath)
+
+            log_client.set_msg(log_type="info",
+                               log_msg="element was reached successfully")
+
+            log_client.set_msg(log_type="info",
+                               log_msg="logging in")
+
             self.action_on_elem(web_elem=login_btn,
                                 action="click")
             sleep(2)
 
         except Exception as e:
-            print(f"Error args: {e.args}")
+
+            log_client.set_msg(log_type="error",
+                               log_msg=f"the following error occurred with args: {e.args}")
+
+        finally:
+
             self.chrome.quit()
 
         # return chrome with web page authenticated

@@ -12,22 +12,24 @@ import uuid
 
 project_dir = Path(__file__).resolve().parents[2]
 file_name = os.path.basename(__file__)
-run_uuid = uuid.uuid4()
+log_run_uuid = uuid.uuid4()
+log_output_file = "acc_balance.log"
 
 
 def append_data_to_json(data_to_append: Dict[str, Any], file):
 
-    log_client = LogsClient(output_file="acc_balance.log",
-                            logs_dir=project_dir,
+    log_client = LogsClient(output_file=log_output_file,
+                            project_dir=project_dir,
                             file_name=file_name,
-                            run_uuid=run_uuid)
+                            log_run_uuid=log_run_uuid)
 
-    log_client.logging_begin()
+    log_client.set_msg(log_type="info",
+                       log_msg="beginning of function")
 
     try:
 
-        log_client.logging_set_msg(log_type="info",
-                                   log_msg="appending data to existing json file")
+        log_client.set_msg(log_type="info",
+                           log_msg="appending data to existing json file")
 
         new_file_content = {}
 
@@ -51,100 +53,110 @@ def append_data_to_json(data_to_append: Dict[str, Any], file):
 
                 new_file_content[key] = value_list
 
-        log_client.logging_end()
+        log_client.set_msg(log_type="info",
+                           log_msg="ending of function")
 
         return new_file_content
 
     except Exception as e:
 
-        log_client.logging_set_msg(log_type="error",
-                                   log_msg=f"the following error occurred with args: {e.args}")
+        log_client.set_msg(log_type="error",
+                           log_msg=f"the following error occurred with args: {e.args}")
 
 
 def create_json(file_path: str, data_dict: Dict[str, Any]):
 
-    log_client = LogsClient(output_file="acc_balance.log",
-                            logs_dir=project_dir,
+    log_client = LogsClient(output_file=log_output_file,
+                            project_dir=project_dir,
                             file_name=file_name,
-                            run_uuid=run_uuid)
+                            log_run_uuid=log_run_uuid)
 
-    log_client.logging_begin()
+    log_client.set_msg(log_type="info",
+                       log_msg="beginning of function")
 
     try:
 
-        log_client.logging_set_msg(log_type="info",
-                                   log_msg="creating json file")
+        log_client.set_msg(log_type="info",
+                           log_msg="creating json file")
 
         with io.open(os.path.join(file_path), 'w') as f:
 
             f.write(json.dumps(data_dict))
 
-        log_client.logging_end()
+        log_client.set_msg(log_type="info",
+                           log_msg="ending of function")
 
     except Exception as e:
 
-        log_client.logging_set_msg(log_type="error",
-                                   log_msg=f"the following error occurred with args: {e.args}")
+        log_client.set_msg(log_type="error",
+                           log_msg=f"the following error occurred with args: {e.args}")
 
 
 def _get_chrome_authenticated():
 
-    log_client = LogsClient(output_file="acc_balance.log",
-                            logs_dir=project_dir,
+    log_client = LogsClient(output_file=log_output_file,
+                            project_dir=project_dir,
                             file_name=file_name,
-                            run_uuid=run_uuid)
+                            log_run_uuid=log_run_uuid)
 
-    log_client.logging_begin()
+    log_client.set_msg(log_type="info",
+                       log_msg="beginning of function")
 
     try:
 
-        bank_initial_page = BankWrapper().get_initial_page()
+        bank_initial_page = BankWrapper(log_run_uuid=log_run_uuid,
+                                        log_output_file=log_output_file,
+                                        options=[])\
+                                        .get_initial_page()
 
-        log_client.logging_end()
+        log_client.set_msg(log_type="info",
+                           log_msg="ending of function")
 
         return bank_initial_page
 
     except Exception as e:
 
-        log_client.logging_set_msg(log_type="error",
-                                   log_msg=f"the following error occurred with args: {e.args}")
+        log_client.set_msg(log_type="error",
+                           log_msg=f"the following error occurred with args: {e.args}")
 
 
 def get_acc_balance():
 
-    log_client = LogsClient(output_file="acc_balance.log",
-                            logs_dir=project_dir,
+    log_client = LogsClient(output_file=log_output_file,
+                            project_dir=project_dir,
                             file_name=file_name,
-                            run_uuid=run_uuid)
+                            log_run_uuid=log_run_uuid)
 
-    log_client.logging_begin()
+    log_client.set_msg(log_type="info",
+                       log_msg="beginning of function")
 
     try:
 
         chrome = _get_chrome_authenticated()
 
-        acc_elem_xpath = '//*[@id="box_conteudo"]/table[1]/tbody/tr[1]/td[2]'
+        web_elem_xpath = '//*[@id="box_conteudo"]/table[1]/tbody/tr[1]/td[2]'
 
-        log_client.logging_set_msg(log_type="info",
-                                   log_msg=f"trying to reach element at xpath: {acc_elem_xpath}")
+        log_client.set_msg(log_type="info",
+                           log_msg=f"trying to reach element at xpath: {web_elem_xpath}")
 
-        acc_elem = chrome.find_element_by_xpath(acc_elem_xpath)
+        acc_elem = chrome.find_element_by_xpath(web_elem_xpath)
 
-        log_client.logging_set_msg(log_type="info",
-                                   log_msg="element was reached successfully")
+        log_client.set_msg(log_type="info",
+                           log_msg="element was reached successfully")
 
         acc_balance_str = acc_elem.text.replace(".", "").replace(",", ".")[:-1]
 
         chrome.quit()
 
-        log_client.logging_end()
+        log_client.set_msg(log_type="info",
+                           log_msg="ending of function")
 
         return float(acc_balance_str)
 
     except Exception as e:
 
-        log_client.logging_set_msg(log_type="error",
-                                   log_msg=f"the following error occurred with args: {e.args}")
+        log_client.set_msg(log_type="error",
+                           log_msg=f"the following error occurred with args: {e.args}")
 
     finally:
 
@@ -153,12 +165,13 @@ def get_acc_balance():
 
 def main():
 
-    log_client = LogsClient(output_file="acc_balance.log",
-                            logs_dir=project_dir,
+    log_client = LogsClient(output_file=log_output_file,
+                            project_dir=project_dir,
                             file_name=file_name,
-                            run_uuid=run_uuid)
+                            log_run_uuid=log_run_uuid)
 
-    log_client.logging_begin()
+    log_client.set_msg(log_type="info",
+                       log_msg="beginning of function")
 
     try:
 
@@ -190,14 +203,15 @@ def main():
 
             create_json(file_path=file_path, data_dict=data_dict)
 
-        # S3Bucket().upload_file(file_path=str(file_path))
+        S3Bucket().upload_file(file_path=str(file_path))
 
-        log_client.logging_end()
+        log_client.set_msg(log_type="info",
+                           log_msg="ending of function")
 
     except Exception as e:
 
-        log_client.logging_set_msg(log_type="error",
-                                   log_msg=f"the following error occurred with args: {e.args}")
+        log_client.set_msg(log_type="error",
+                           log_msg=f"the following error occurred with args: {e.args}")
 
 
 if __name__ == "__main__":
