@@ -1,4 +1,4 @@
-from wrapper_bank_initial_page import BankWrapper
+from src.wrappers.bank_webpage_auth import BankWrapper
 from datetime import datetime
 import json
 from pathlib import Path
@@ -8,23 +8,20 @@ from typing import Dict, Any
 from src.clients.aws_s3_bucket import S3Bucket
 from logs.logs_generator import LogsClient
 import uuid
+from time import sleep
+from selenium.webdriver import Chrome
 
 
-project_dir = Path(__file__).resolve().parents[2]
-file_name = os.path.basename(__file__)
-log_run_uuid = uuid.uuid4()
-log_output_file = "acc_balance.log"
+project_dir = Path(__file__).resolve().parents[3]
+
+
+log_client = LogsClient(output_file="acc_balance.log",
+                        project_dir=project_dir,
+                        file_name=os.path.basename(__file__),
+                        log_run_uuid=uuid.uuid4())
 
 
 def append_data_to_json(data_to_append: Dict[str, Any], file):
-
-    log_client = LogsClient(output_file=log_output_file,
-                            project_dir=project_dir,
-                            file_name=file_name,
-                            log_run_uuid=log_run_uuid)
-
-    log_client.set_msg(log_type="info",
-                       log_msg="beginning of function")
 
     try:
 
@@ -53,9 +50,6 @@ def append_data_to_json(data_to_append: Dict[str, Any], file):
 
                 new_file_content[key] = value_list
 
-        log_client.set_msg(log_type="info",
-                           log_msg="ending of function")
-
         return new_file_content
 
     except Exception as e:
@@ -66,14 +60,6 @@ def append_data_to_json(data_to_append: Dict[str, Any], file):
 
 def create_json(file_path: str, data_dict: Dict[str, Any]):
 
-    log_client = LogsClient(output_file=log_output_file,
-                            project_dir=project_dir,
-                            file_name=file_name,
-                            log_run_uuid=log_run_uuid)
-
-    log_client.set_msg(log_type="info",
-                       log_msg="beginning of function")
-
     try:
 
         log_client.set_msg(log_type="info",
@@ -83,9 +69,6 @@ def create_json(file_path: str, data_dict: Dict[str, Any]):
 
             f.write(json.dumps(data_dict))
 
-        log_client.set_msg(log_type="info",
-                           log_msg="ending of function")
-
     except Exception as e:
 
         log_client.set_msg(log_type="error",
@@ -94,23 +77,14 @@ def create_json(file_path: str, data_dict: Dict[str, Any]):
 
 def _get_chrome_authenticated():
 
-    log_client = LogsClient(output_file=log_output_file,
-                            project_dir=project_dir,
-                            file_name=file_name,
-                            log_run_uuid=log_run_uuid)
-
     log_client.set_msg(log_type="info",
-                       log_msg="beginning of function")
+                       log_msg="getting chrome authenticated through bank wrapper")
 
     try:
 
-        bank_initial_page = BankWrapper(log_run_uuid=log_run_uuid,
-                                        log_output_file=log_output_file,
-                                        options=[])\
+        bank_initial_page = BankWrapper(log_run_uuid=log_client.log_run_uuid,
+                                        log_output_file=log_client.output_file)\
                                         .get_initial_page()
-
-        log_client.set_msg(log_type="info",
-                           log_msg="ending of function")
 
         return bank_initial_page
 
@@ -120,36 +94,24 @@ def _get_chrome_authenticated():
                            log_msg=f"the following error occurred with args: {e.args}")
 
 
-def get_acc_balance():
-
-    log_client = LogsClient(output_file=log_output_file,
-                            project_dir=project_dir,
-                            file_name=file_name,
-                            log_run_uuid=log_run_uuid)
-
-    log_client.set_msg(log_type="info",
-                       log_msg="beginning of function")
+def get_acc_balance(chrome: Chrome):
 
     try:
 
-        chrome = _get_chrome_authenticated()
-
-        web_elem_xpath = '//*[@id="box_conteudo"]/table[1]/tbody/tr[1]/td[2]'
+        xpath = '//*[@id="box_conteudo"]/table[1]/tbody/tr[1]/td[2]'
 
         log_client.set_msg(log_type="info",
-                           log_msg=f"trying to reach element at xpath: {web_elem_xpath}")
+                           log_msg=f"trying to reach element at xpath: {xpath}")
 
-        acc_elem = chrome.find_element_by_xpath(web_elem_xpath)
+        acc_elem = chrome.find_element_by_xpath(xpath=xpath)
+        sleep(2)
 
         log_client.set_msg(log_type="info",
                            log_msg="element was reached successfully")
 
-        acc_balance_str = acc_elem.text.replace(".", "").replace(",", ".")[:-1]
-
-        chrome.quit()
-
         log_client.set_msg(log_type="info",
-                           log_msg="ending of function")
+                           log_msg="parsing elements text properties")
+        acc_balance_str = acc_elem.text.replace(".", "").replace(",", ".")[:-1]
 
         return float(acc_balance_str)
 
@@ -165,17 +127,14 @@ def get_acc_balance():
 
 def main():
 
-    log_client = LogsClient(output_file=log_output_file,
-                            project_dir=project_dir,
-                            file_name=file_name,
-                            log_run_uuid=log_run_uuid)
-
     log_client.set_msg(log_type="info",
-                       log_msg="beginning of function")
+                       log_msg="beginning of script")
 
     try:
 
-        acc_balance_float = get_acc_balance()
+        chrome = _get_chrome_authenticated()
+
+        acc_balance_float = get_acc_balance(chrome=chrome)
 
         time_now = datetime.now()
 
@@ -205,13 +164,15 @@ def main():
 
         S3Bucket().upload_file(file_path=str(file_path))
 
-        log_client.set_msg(log_type="info",
-                           log_msg="ending of function")
-
     except Exception as e:
 
         log_client.set_msg(log_type="error",
                            log_msg=f"the following error occurred with args: {e.args}")
+
+    finally:
+
+        log_client.set_msg(log_type="info",
+                           log_msg="end of script")
 
 
 if __name__ == "__main__":

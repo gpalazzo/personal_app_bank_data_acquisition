@@ -12,10 +12,11 @@ class LogsClient:
                  log_run_uuid: uuid4):
         """Get both file name and function being executed only aiming ease the troubleshooting in case of errors.
         """
-        self.func_name = self._get_caller_func_name()
+        # self.func_name = self._get_caller_func_name()
         self.file_name = file_name
         self.log_run_uuid = log_run_uuid
-        self._set_log_config(output_file=output_file,
+        self.output_file = output_file
+        self._set_log_config(output_file=self.output_file,
                              project_dir=project_dir)
 
     @staticmethod
@@ -34,6 +35,8 @@ class LogsClient:
 
     def set_msg(self, log_type: str = "", log_msg: str = ""):
 
+        func_name = self._get_caller_func_name()
+
         if log_type == "" or log_msg == "":
 
             raise ValueError("please provide log_type (e.g., info) and log_msg (e.g., running function)")
@@ -42,11 +45,11 @@ class LogsClient:
 
             if log_type == "info":
 
-                logging.info(msg=f"{self.file_name} - {self.func_name} - {self.log_run_uuid} - {log_msg}")
+                logging.info(msg=f"{self.file_name} - {func_name} - {log_msg} - {self.log_run_uuid}")
 
             elif log_type == "error":
 
-                logging.error(msg=f"{self.file_name} - {self.func_name} - {self.log_run_uuid} - {log_msg}")
+                logging.error(msg=f"{self.file_name} - {func_name} - {log_msg} - {self.log_run_uuid}")
 
             else:
 

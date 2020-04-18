@@ -20,8 +20,8 @@ for file in log_files:
                                         "log_type": line_splitted[1],
                                         "file_name": line_splitted[2],
                                         "function_name": line_splitted[3],
-                                        "run_uuid": line_splitted[4],
-                                        "log_msg": line_splitted[5].rstrip()
+                                        "log_msg": line_splitted[4],
+                                        "run_uuid": line_splitted[5].rstrip()
                                         },
                                   index=[0]
                                  )

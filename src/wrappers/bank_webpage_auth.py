@@ -47,9 +47,6 @@ class BankWrapper:
                                 file_name=file_name,
                                 log_run_uuid=self.log_run_uuid)
 
-        log_client.set_msg(log_type="info",
-                           log_msg="beginning of function")
-
         try:
 
             log_client.set_msg(log_type="info",
@@ -76,9 +73,6 @@ class BankWrapper:
 
             sleep(0.1)
 
-            log_client.set_msg(log_type="info",
-                               log_msg="ending of function")
-
             return web_elem
 
         except NoSuchElementException:
@@ -99,7 +93,7 @@ class BankWrapper:
                                 log_run_uuid=self.log_run_uuid)
 
         log_client.set_msg(log_type="info",
-                           log_msg="beginning of function")
+                           log_msg=f"action: {action} on web element: {web_elem}")
 
         try:
 
@@ -110,9 +104,6 @@ class BankWrapper:
             elif action == "send_keys":
 
                 web_elem.send_keys(content)
-
-            log_client.set_msg(log_type="info",
-                               log_msg="ending of function")
 
             sleep(2)
 
@@ -133,9 +124,6 @@ class BankWrapper:
                                 file_name=file_name,
                                 log_run_uuid=self.log_run_uuid)
 
-        log_client.set_msg(log_type="info",
-                           log_msg="beginning of function")
-
         try:
 
             # delete cookies and go to defined url
@@ -151,21 +139,15 @@ class BankWrapper:
 
             self.chrome.get(self.url)
 
-            sleep(4)
+            sleep(5)
 
             # get agency text box
             web_elem_xpath = '//*[@id="cooperativa"]'
 
-            log_client.set_msg(log_type="info",
-                               log_msg=f"trying to reach element at xpath: {web_elem_xpath}")
-
             agency = self.find_element(find_method="xpath",
                                        path_to_elem=web_elem_xpath)
 
-            log_client.set_msg(log_type="info",
-                               log_msg="element was reached successfully")
-
-            sleep(2)
+            sleep(5)
 
             # fill in agency
             log_client.set_msg(log_type="info",
@@ -175,13 +157,10 @@ class BankWrapper:
                                 action="send_keys",
                                 content=self.agency)
 
-            sleep(2)
+            sleep(5)
 
             # get account text box
             web_elem_xpath = '//*[@id="conta"]'
-
-            log_client.set_msg(log_type="info",
-                               log_msg=f"trying to reach element at xpath: {web_elem_xpath}")
 
             account = self.find_element(find_method="xpath",
                                         path_to_elem=web_elem_xpath)
@@ -193,28 +172,21 @@ class BankWrapper:
             self.action_on_elem(web_elem=account,
                                 action="send_keys",
                                 content=self.account)
-            sleep(2)
+            sleep(5)
 
             # loop over password length
             log_client.set_msg(log_type="info",
                                log_msg="filling bank password")
 
+            log_client.set_msg(log_type="info",
+                               log_msg=f"filling password characters")
             for i, character in enumerate(self.password, 1):
 
                 web_elem_path = "tecla"
 
-                log_client.set_msg(log_type="info",
-                                   log_msg=f"trying to reach element at path: {web_elem_path}")
-
                 numbered_btns = self.find_element(find_method="class",
                                                   path_to_elem=web_elem_path,
                                                   more_than_1_elem=True)
-
-                log_client.set_msg(log_type="info",
-                                   log_msg="element was reached successfully")
-
-                log_client.set_msg(log_type="info",
-                                   log_msg=f"filling character {i} of the password")
 
                 # when there's match between password character and web page character, then click on it
                 for number in numbered_btns:
@@ -225,30 +197,22 @@ class BankWrapper:
             # login after filling in the password
             web_elem_xpath = '//*[@id="buttons"]/input[1]'
 
-            log_client.set_msg(log_type="info",
-                               log_msg=f"trying to reach element at path: {web_elem_xpath}")
-
             login_btn = self.find_element(find_method="xpath",
                                           path_to_elem=web_elem_xpath)
-
-            log_client.set_msg(log_type="info",
-                               log_msg="element was reached successfully")
 
             log_client.set_msg(log_type="info",
                                log_msg="logging in")
 
             self.action_on_elem(web_elem=login_btn,
                                 action="click")
-            sleep(2)
+            sleep(5)
+
+            return self.chrome
 
         except Exception as e:
 
             log_client.set_msg(log_type="error",
                                log_msg=f"the following error occurred with args: {e.args}")
 
-        finally:
+            assert False, "breaking code execution, see log file to track error"
 
-            self.chrome.quit()
-
-        # return chrome with web page authenticated
-        return self.chrome

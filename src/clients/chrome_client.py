@@ -42,7 +42,7 @@ class ChromeClient:
                                 log_run_uuid=self.log_run_uuid)
 
         log_client.set_msg(log_type="info",
-                           log_msg="beginning of function")
+                           log_msg="setting chrome options")
 
         try:
 
@@ -54,12 +54,11 @@ class ChromeClient:
                 else:
                     chrome_options.add_argument(option)
 
-            log_client.set_msg(log_type="info",
-                               log_msg="ending of function")
-
             return chrome_options
 
         except Exception as e:
 
             log_client.set_msg(log_type="error",
                                log_msg=f"the following error occurred with args: {e.args}")
+
+            assert False, "breaking code execution, see log file to track error"
