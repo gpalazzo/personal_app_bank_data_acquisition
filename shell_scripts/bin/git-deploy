@@ -9,29 +9,8 @@ if [ "$answer_best_practices" == "y" ]; then
 
     if [ "$current_branch" == "master" ]; then
 
-        read -r -p "Are you sure you wanna push directly to master branch? [y/n] --> " answer_current_branch
+        printf "It's no possible to push directly to master branch.\nPlease create a new branch before continue.\n"
 
-        if [ "$answer_current_branch" == "y" ]; then
-
-            read -r -p "Commit message: " commit_message
-
-            printf ">>> Deleting pycache, pyc, .idea and .DS_Store files from: %s\n" "$current_branch"
-            find . | grep -E "(__pycache__|\.pyc|\.idea|.DS_Store$)" | xargs rm -rf
-
-            printf ">>> Adding files from: %s\n" "$current_branch"
-            git add .
-
-            printf ">>> Commiting with message: %s\n" "$commit_message"
-            git commit -m "$commit_message"
-
-            printf ">>> Pushing branch: %s\n" "$current_branch"
-            git push origin "$current_branch"
-
-        else
-
-            printf "Please create a new branch before continue.\n"
-
-        fi
 
     else
 
