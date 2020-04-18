@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 file_name = os.path.basename(__file__)
-project_dir = Path(__file__).resolve().parents[2]
+project_dir = Path(__file__).resolve().parents[3]
 
 
 class BankWrapper:
@@ -21,7 +21,7 @@ class BankWrapper:
                  log_run_uuid,
                  log_output_file,
                  options: List = ["--headless",
-                                        {"profile.managed_default_content_settings.images": 2}]):
+                                 {"profile.managed_default_content_settings.images": 2}]):
         """Creates instance of BankWrapper class with needed objects to login into bank web page.
         Args:
             options: options to be inserted into ChromeOptions class. Defaults to ["--headless",

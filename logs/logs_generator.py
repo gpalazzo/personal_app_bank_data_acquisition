@@ -12,7 +12,6 @@ class LogsClient:
                  log_run_uuid: uuid4):
         """Get both file name and function being executed only aiming ease the troubleshooting in case of errors.
         """
-        # self.func_name = self._get_caller_func_name()
         self.file_name = file_name
         self.log_run_uuid = log_run_uuid
         self.output_file = output_file
