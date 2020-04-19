@@ -174,11 +174,6 @@ class MagnetisWrapper:
             log_client.set_msg(log_type="error",
                                log_msg=f"the following error occurred with args: {e.args}")
 
-        finally:
-
-            assert False, "breaking code execution, see log file to track error"
-
-
-MagnetisWrapper(log_run_uuid="bla",
-                log_output_file="magnetis.log",
-                options=[]).get_initial_page()
+        # finally:
+        #
+        #     assert False, "breaking code execution, see log file to track error"

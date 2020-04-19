@@ -15,7 +15,7 @@ from selenium.webdriver import Chrome
 
 project_dir = Path(__file__).resolve().parents[3]
 
-log_client = LogsClient(output_file="acc_expenses.log",
+log_client = LogsClient(output_file="bank_acc_expenses.log",
                         project_dir=project_dir,
                         file_name=os.path.basename(__file__),
                         log_run_uuid=uuid.uuid4())
@@ -196,7 +196,7 @@ def main():
 
         date_today = datetime.strftime(datetime.now(), "%Y-%m-%d")
 
-        file_path = project_dir / Path(f"output_files/acc_expenses_{date_today}.json")
+        file_path = project_dir / Path(f"output_files/bank_acc_expenses_{date_today}.json")
 
         create_json(file_path=file_path, json_content=json_content)
 
