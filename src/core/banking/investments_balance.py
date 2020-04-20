@@ -20,6 +20,43 @@ log_client = LogsClient(output_file="bank_investments_balance.log",
                         log_run_uuid=uuid.uuid4())
 
 
+def append_data_to_json(data_to_append: Dict[str, Any], file):
+
+    try:
+
+        log_client.set_msg(log_type="info",
+                           log_msg="appending data to existing json file")
+
+        new_file_content = {}
+
+        for content in file:
+
+            content_json = json.loads(content)
+
+            for key, value in content_json.items():
+
+                if isinstance(value, list):
+
+                    value_list = value
+
+                else:
+
+                    value_list = [value]
+
+                new_value = data_to_append[key]
+
+                value_list.append(new_value)
+
+                new_file_content[key] = value_list
+
+        return new_file_content
+
+    except Exception as e:
+
+        log_client.set_msg(log_type="error",
+                           log_msg=f"the following error occurred with args: {e.args}")
+
+
 def create_json(file_path: str, data_dict: Dict[str, Any]):
 
     try:
@@ -107,7 +144,21 @@ def main():
                      "rdc": rdc,
                      "lca": lca}
 
-        create_json(file_path=file_path, data_dict=data_dict)
+        if os.path.isfile(path=file_path) and os.access(file_path, os.R_OK):
+
+            with open(file_path, 'r+') as f:
+
+                file_content = append_data_to_json(data_dict, f)
+
+                f.seek(0)
+
+                f.truncate()
+
+                json.dump(file_content, f)
+
+        else:
+
+            create_json(file_path=file_path, data_dict=data_dict)
 
         S3Bucket().upload_file(file_path=str(file_path))
 

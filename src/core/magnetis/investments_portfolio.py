@@ -1,21 +1,21 @@
-from logs.logs_generator import LogsClient
-import uuid
-from time import sleep
-from selenium.webdriver import Chrome
-from pathlib import Path
-import os
-from typing import Dict, Any
-import io
-import json
 from src.wrappers.magnetis_webpage_auth import MagnetisWrapper
 from datetime import datetime
 from src.clients.aws_s3_bucket import S3Bucket
+from logs.logs_generator import LogsClient
+from pathlib import Path
+import uuid
+from typing import Dict, Any
+import json
+import io
+import os
+from selenium.webdriver import Chrome
+from time import sleep
 
 
 project_dir = Path(__file__).resolve().parents[3]
 
 
-log_client = LogsClient(output_file="magnetis_investments_balance.log",
+log_client = LogsClient(output_file="magnetis_investments_portfolio.log",
                         project_dir=project_dir,
                         file_name=os.path.basename(__file__),
                         log_run_uuid=uuid.uuid4())
@@ -95,55 +95,49 @@ def _get_chrome_authenticated():
                            log_msg=f"the following error occurred with args: {e.args}")
 
 
-def get_investments_balance(chrome: Chrome):
+def get_investments_portfolio(chrome: Chrome):
 
     try:
 
-        xpath = '//*[@id="root"]/div/main/div[4]/div/div[1]/span'
+        xpath = '//*[@id="root"]/div/main/div[4]/a/i'
 
         log_client.set_msg(log_type="info",
                            log_msg=f"trying to reach element at xpath: {xpath}")
 
-        patrimony = chrome.find_element_by_xpath(xpath=xpath)
-        sleep(2)
-
-        log_client.set_msg(log_type="info",
-                           log_msg="parsing element text properties")
-
-        patrimony_str = patrimony.text.replace(".", "").replace(",", ".")
-
-        xpath = '//*[@id="root"]/div/main/div[4]/div/div[3]/span'
-
-        log_client.set_msg(log_type="info",
-                           log_msg=f"trying to reach element at xpath: {xpath}")
-
-        gross_income = chrome.find_element_by_xpath(xpath=xpath)
+        portfolio_drill_down = chrome.find_element_by_xpath(xpath=xpath)
         sleep(2)
 
         log_client.set_msg(log_type="info",
                            log_msg="element was reached successfully")
 
         log_client.set_msg(log_type="info",
-                           log_msg="parsing element text properties")
+                           log_msg=f"action click on elem: {portfolio_drill_down}")
 
-        gross_income_str = gross_income.text.replace(".", "").replace(",", ".")
+        portfolio_drill_down.click()
 
-        xpath = '//*[@id="root"]/div/main/div[4]/div/div[2]/span'
+        sleep(5)
 
+        class_name = "category_1rId8"
         log_client.set_msg(log_type="info",
-                           log_msg=f"trying to reach element at xpath: {xpath}")
+                           log_msg=f"trying to reach element with class name: {class_name}")
 
-        gross_return_pct = chrome.find_element_by_xpath(xpath=xpath)
+        assets_distribution = chrome.find_elements_by_class_name(name=class_name)
         sleep(2)
 
         log_client.set_msg(log_type="info",
                            log_msg="element was reached successfully")
 
-        log_client.set_msg(log_type="info",
-                           log_msg="parsing element text properties")
-        gross_return_pct_str = gross_return_pct.text.replace(".", "").replace(",", ".")
+        assets = {}
 
-        return patrimony_str, gross_income_str, gross_return_pct_str
+        for asset_settings in assets_distribution:
+
+            # [0]: asset_name, [1]: asset current balance, [2]: asset return pct, [3]: asset pct portfolio
+            asset_settings_list = asset_settings.text.split("\n")
+            assets[asset_settings_list[0]] = {"balance": asset_settings_list[1],
+                                              "return_pct": asset_settings_list[2],
+                                              "portfolio_pct": asset_settings_list[3]}
+
+        return assets
 
     except Exception as e:
 
@@ -164,18 +158,15 @@ def main():
 
         chrome = _get_chrome_authenticated()
 
-        patrimony, gross_income, gross_return_pct = get_investments_balance(chrome=chrome)
+        data_dict = get_investments_portfolio(chrome=chrome)
 
         time_now = datetime.now()
 
         date_today = datetime.strftime(time_now, "%Y-%m-%d")
 
-        file_path = project_dir / Path(f"output_files/magnetis_investments_balance_{date_today}.json")
+        file_path = project_dir / Path(f"output_files/magnetis_investments_portfolio_{date_today}.json")
 
-        data_dict = {"action_timestamp": str(time_now),
-                     "patrimony": patrimony,
-                     "gross_income": gross_income,
-                     "gross_return_pct": gross_return_pct}
+        data_dict.update({"action_timestamp": str(time_now)})
 
         if os.path.isfile(path=file_path) and os.access(file_path, os.R_OK):
 
