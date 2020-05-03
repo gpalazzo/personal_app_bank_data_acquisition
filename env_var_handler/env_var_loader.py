@@ -2,7 +2,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 
-project_dir = str(Path(__file__).resolve().parents[2])
+project_dir = str(Path(__file__).resolve().parents[3])
 
 
 def load_credentials():
