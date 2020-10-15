@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 
 
 project_dir = str(Path(__file__).resolve().parents[3])
+project_dir += "/setup_config_credentials"
 
 
 def load_credentials():

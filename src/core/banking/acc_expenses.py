@@ -7,7 +7,6 @@ import os
 import io
 from datetime import datetime
 from pathlib import Path
-from src.clients.aws_s3_bucket import S3Bucket
 from logs.logs_generator import LogsClient
 import uuid
 from selenium.webdriver import Chrome
@@ -199,8 +198,6 @@ def main():
         file_path = project_dir / Path(f"output_files/bank_acc_expenses_{date_today}.json")
 
         create_json(file_path=file_path, json_content=json_content)
-
-        S3Bucket().upload_file(file_path=str(file_path))
 
     except Exception as e:
 

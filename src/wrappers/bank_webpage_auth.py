@@ -12,6 +12,9 @@ from pathlib import Path
 file_name = os.path.basename(__file__)
 project_dir = Path(__file__).resolve().parents[3]
 
+# load credentials and configs as env variables
+load_credentials(), load_config()
+
 
 class BankWrapper:
     """Class that encapsulates the process of inserting env_var_handler into bank web page.
@@ -27,8 +30,6 @@ class BankWrapper:
             options: options to be inserted into ChromeOptions class. Defaults to ["--headless",
                                                                 {"profile.managed_default_content_settings.images": 2}]
         """
-        # load credentials and configs as env variables
-        load_credentials(), load_config()
         self.url = os.getenv("bank_url")
         self.agency = os.getenv("bank_agency")
         self.account = os.getenv("bank_account")
@@ -138,7 +139,6 @@ class BankWrapper:
                                log_msg=f"going to url: {self.url}")
 
             self.chrome.get(self.url)
-
             sleep(5)
 
             # get agency text box
@@ -215,4 +215,3 @@ class BankWrapper:
                                log_msg=f"the following error occurred with args: {e.args}")
 
             assert False, "breaking code execution, see log file to track error"
-

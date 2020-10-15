@@ -5,7 +5,6 @@ from pathlib import Path
 import io
 import os
 from typing import Dict, Any
-from src.clients.aws_s3_bucket import S3Bucket
 from logs.logs_generator import LogsClient
 import uuid
 from selenium.webdriver import Chrome
@@ -159,8 +158,6 @@ def main():
         else:
 
             create_json(file_path=file_path, data_dict=data_dict)
-
-        S3Bucket().upload_file(file_path=str(file_path))
 
     except Exception as e:
 
