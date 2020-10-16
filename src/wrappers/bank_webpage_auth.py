@@ -24,6 +24,8 @@ class BankWrapper:
                  log_run_uuid,
                  log_output_file,
                  options: List = ["--headless",
+                                  "--no-sandbox",
+                                  "--disable-dev-shm-usage",
                                  {"profile.managed_default_content_settings.images": 2}]):
         """Creates instance of BankWrapper class with needed objects to login into bank web page.
         Args:
