@@ -14,11 +14,10 @@ from utils.config_vars import *
 
 
 local_project_root_dir = Path(__file__).resolve().parents[5]
-git_project_root_dir = Path(__file__).resolve().parents[3]
 
 
 log_client = LogsClient(output_file="bank_acc_expenses.log",
-                        project_dir=git_project_root_dir,
+                        project_dir=local_project_root_dir,
                         file_name=os.path.basename(__file__),
                         log_run_uuid=uuid.uuid4())
 
@@ -198,7 +197,7 @@ def main():
 
         date_today = datetime.strftime(datetime.now(), "%Y-%m-%d")
 
-        file_path = local_project_root_dir / Path(f"{FILE_OUTPUT_DIR}/bank_acc_expenses_{date_today}.json")
+        file_path = local_project_root_dir / Path(f"{FINANCIAL_DATA_FILES_OUTPUT_DIR}/bank_acc_expenses_{date_today}.json")
 
         create_json(file_path=file_path, json_content=json_content)
 
