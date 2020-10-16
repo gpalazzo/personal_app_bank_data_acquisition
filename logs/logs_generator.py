@@ -1,6 +1,7 @@
 import logging
 import inspect
 from uuid import uuid4
+from utils.config_vars import *
 
 
 class LogsClient:
@@ -22,7 +23,7 @@ class LogsClient:
     def _set_log_config(output_file: str,
                         project_dir: str):
 
-        logging.basicConfig(filename=f"{project_dir}/logs/logs_output/{output_file}",
+        logging.basicConfig(filename=f"{project_dir}/{LOGS_FILES_OUTPUT_DIR}/{output_file}",
                             level=logging.INFO,
                             format="%(asctime)s - %(levelname)s - %(message)s",
                             datefmt="%Y-%m-%d %H:%M:%S")
