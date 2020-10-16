@@ -8,7 +8,7 @@ from typing import Dict, Any
 from logs.logs_generator import LogsClient
 import uuid
 from selenium.webdriver import Chrome
-from utils.config_vars import *
+from utils.config_vars import FINANCIAL_DATA_FILES_OUTPUT_DIR
 
 
 local_project_root_dir = Path(__file__).resolve().parents[5]

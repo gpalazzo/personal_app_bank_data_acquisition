@@ -1,7 +1,7 @@
 import logging
 import inspect
 from uuid import uuid4
-from utils.config_vars import *
+from utils.config_vars import LOGS_FILES_OUTPUT_DIR
 
 
 class LogsClient:
