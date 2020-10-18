@@ -9,15 +9,16 @@ from logs.logs_generator import LogsClient
 import uuid
 from selenium.webdriver import Chrome
 from utils.config_vars import FINANCIAL_DATA_FILES_OUTPUT_DIR
+import pytz
 
 
 local_project_root_dir = Path(__file__).resolve().parents[5]
-
+uuid_4 = uuid.uuid4()
 
 log_client = LogsClient(output_file="bank_investments_balance.log",
                         project_dir=local_project_root_dir,
                         file_name=os.path.basename(__file__),
-                        log_run_uuid=uuid.uuid4())
+                        log_run_uuid=uuid_4)
 
 
 def append_data_to_json(data_to_append: Dict[str, Any], file):
@@ -149,7 +150,8 @@ def main():
         data_dict = {"action_timestamp": str(time_now),
                      "rdc_pre_fixed": rdc_pre_fixed,
                      "rdc_post_fixed": rdc_post_fixed,
-                     "lca": lca}
+                     "lca": lca,
+                     "uuid": str(uuid_4)}
 
         if os.path.isfile(path=file_path) and os.access(file_path, os.R_OK):
 

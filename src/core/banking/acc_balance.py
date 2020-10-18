@@ -10,15 +10,16 @@ import uuid
 from time import sleep
 from selenium.webdriver import Chrome
 from utils.config_vars import FINANCIAL_DATA_FILES_OUTPUT_DIR
+import pytz
 
 
 local_project_root_dir = Path(__file__).resolve().parents[5]
-
+uuid_4 = uuid.uuid4()
 
 log_client = LogsClient(output_file="bank_acc_balance.log",
                         project_dir=local_project_root_dir,
                         file_name=os.path.basename(__file__),
-                        log_run_uuid=uuid.uuid4())
+                        log_run_uuid=uuid_4)
 
 
 def append_data_to_json(data_to_append: Dict[str, Any], file):
@@ -136,14 +137,15 @@ def main():
 
         acc_balance_float = get_acc_balance(chrome=chrome)
 
-        time_now = datetime.now()
+        time_now = datetime.now(tz=pytz.utc)
 
         date_today = datetime.strftime(time_now, "%Y-%m-%d")
 
         file_path = local_project_root_dir / Path(f"{FINANCIAL_DATA_FILES_OUTPUT_DIR}/bank_acc_balance_{date_today}.json")
 
         data_dict = {"action_timestamp": str(time_now),
-                     "acc_balance": acc_balance_float}
+                     "acc_balance": acc_balance_float,
+                     "uuid": str(uuid_4)}
 
         if os.path.isfile(path=file_path) and os.access(file_path, os.R_OK):
 
