@@ -1,8 +1,9 @@
 import os
 from multiprocessing import Pool
+from pathlib import Path
 
-
-processes = ("acc_balance.py", "acc_expenses.py", "investments_balance.py")
+current_path = Path(__file__).resolve().parents[0]
+processes = (f"{current_path}/acc_balance.py", f"{current_path}/acc_expenses.py", f"{current_path}/investments_balance.py")
 
 
 def run_processes(process):
