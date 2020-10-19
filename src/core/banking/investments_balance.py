@@ -142,7 +142,7 @@ def main():
 
         rdc_pre_fixed, rdc_post_fixed, lca = get_rdc_lca_balance(chrome=chrome)
 
-        time_now = datetime.now()
+        time_now = datetime.now(tz=pytz.utc)
         date_today = datetime.strftime(time_now, "%Y-%m-%d")
 
         file_path = local_project_root_dir / Path(f"{FINANCIAL_DATA_FILES_OUTPUT_DIR}/bank_investments_balance_{date_today}.json")
