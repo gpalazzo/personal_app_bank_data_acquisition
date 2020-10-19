@@ -146,12 +146,16 @@ def main():
         date_today = datetime.strftime(time_now, "%Y-%m-%d")
 
         file_path = local_project_root_dir / Path(f"{FINANCIAL_DATA_FILES_OUTPUT_DIR}/bank_investments_balance_{date_today}.json")
+        
+        balance_types = ["rdc_pre_fixed", "rdc_post_fixed", "lca"]
+        balance_values = [rdc_pre_fixed, rdc_post_fixed, lca]
 
-        data_dict = {"action_timestamp": str(time_now),
-                     "rdc_pre_fixed": rdc_pre_fixed,
-                     "rdc_post_fixed": rdc_post_fixed,
-                     "lca": lca,
-                     "uuid": str(uuid_4)}
+        data_dict = {
+                    "uuid": [str(uuid_4)] * len(balance_types),
+                    "run_timestamp": [str(time_now)] * len(balance_types),
+                    "balance_type": balance_types,
+                    "balance_value": balance_values
+                    }
 
         if os.path.isfile(path=file_path) and os.access(file_path, os.R_OK):
 
