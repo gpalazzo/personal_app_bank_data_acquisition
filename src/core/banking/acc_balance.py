@@ -144,10 +144,10 @@ def main():
         file_path = local_project_root_dir / Path(f"{FINANCIAL_DATA_FILES_OUTPUT_DIR}/bank_acc_balance_{date_today}.json")
 
         data_dict = {
-                    "uuid": str(uuid_4), 
-                    "run_timestamp": str(time_now),
-                    "balance_type": "acc_balance",
-                    "balance_value": acc_balance_float
+                    "uuid": [str(uuid_4)], 
+                    "run_timestamp": [str(time_now)],
+                    "balance_type": ["acc_balance"],
+                    "balance_value": [acc_balance_float]
                     }
 
         if os.path.isfile(path=file_path) and os.access(file_path, os.R_OK):
